@@ -1,0 +1,110 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // -------------------------------------------------------------------------
+    // GLOBALS & PRIMITIVES
+    // -------------------------------------------------------------------------
+    
+    function isSignedIn() {
+      return request.auth != null && request.auth.token.email_verified == true;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // -------------------------------------------------------------------------
+    // VALIDATION HELPERS
+    // -------------------------------------------------------------------------
+
+    function isValidUser(data) {
+      return data.keys().hasAll(['uid', 'email']) &&
+             data.uid == request.auth.uid &&
+             data.email is string && data.email.size() <= 256 &&
+             (data.get('displayName', '') is string && data.displayName.size() <= 128) &&
+             (data.get('photoURL', '') is string && data.photoURL.size() <= 512) &&
+             (data.get('storageUsed', 0) is int) &&
+             (data.get('storageLimit', 10737418240) is int);
+    }
+
+    function isValidProject(data) {
+      return data.keys().hasAll(['ownerId', 'title', 'type', 'createdAt', 'updatedAt']) &&
+             data.ownerId == request.auth.uid &&
+             data.title is string && data.title.size() <= 256 &&
+             data.type in ['Song', 'Podcast', 'YouTube Video', 'Reels', 'Album Art'] &&
+             data.createdAt == (resource == null ? request.time : resource.data.createdAt) &&
+             data.updatedAt == request.time;
+    }
+
+    function isValidAsset(data) {
+      return data.keys().hasAll(['ownerId', 'name', 'mimeType', 'size', 'storagePath', 'createdAt']) &&
+             data.ownerId == request.auth.uid &&
+             data.name is string && data.name.size() <= 512 &&
+             data.mimeType is string && data.mimeType.size() <= 128 &&
+             data.size is int &&
+             data.storagePath is string && data.storagePath.size() <= 1024 &&
+             data.createdAt == request.time;
+    }
+
+    function isValidVersion(data) {
+      return data.keys().hasAll(['projectId', 'snapshot', 'createdAt']) &&
+             data.projectId is string &&
+             data.createdAt == request.time &&
+             // Verify the project exists and the user owns it
+             get(/databases/$(database)/documents/projects/$(data.projectId)).data.ownerId == request.auth.uid;
+    }
+
+    // -------------------------------------------------------------------------
+    // MATCH BLOCKS
+    // -------------------------------------------------------------------------
+
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Users
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidUser(incoming());
+      allow update: if isOwner(userId) && isValidUser(incoming()) && 
+                    incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'photoURL', 'updatedAt']);
+    }
+
+    // User Assets
+    match /users/{userId}/assets/{assetId} {
+      allow list, get: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidAsset(incoming());
+      allow delete: if isOwner(userId);
+    }
+
+    // Projects
+    match /projects/{projectId} {
+      allow get: if isSignedIn() && existing().ownerId == request.auth.uid;
+      allow list: if isSignedIn() && resource.data.ownerId == request.auth.uid;
+      allow create: if isSignedIn() && isValidProject(incoming());
+      allow update: if isSignedIn() && existing().ownerId == request.auth.uid && 
+                    isValidProject(incoming()) &&
+                    incoming().diff(existing()).affectedKeys().hasOnly(['title', 'bpm', 'key', 'data', 'updatedAt', 'isPublic', 'collaborators']);
+      allow delete: if isSignedIn() && existing().ownerId == request.auth.uid;
+
+      // Versions
+      match /versions/{versionId} {
+        allow list, get: if isSignedIn() && get(/databases/$(database)/documents/projects/$(projectId)).data.ownerId == request.auth.uid;
+        allow create: if isSignedIn() && isValidVersion(incoming()) && projectId == incoming().projectId;
+      }
+    }
+  }
+}

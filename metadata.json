@@ -1,0 +1,6 @@
+{
+  "name": "Studio One",
+  "description": "A professional-grade unified creative studio for music, video, and design. Multi-track DAW, NLE video editor, and AI-powered production tools.",
+  "requestFramePermissions": ["camera", "microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

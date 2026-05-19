@@ -23,7 +23,7 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 export default function App() {
-  const { user, login } = useAuth();
+  const { user, login, loading } = useAuth();
   const { theme } = useThemeStore();
 
   useEffect(() => {
@@ -191,7 +191,7 @@ export default function App() {
       {/* Main Workspace */}
       <main className={`flex-1 flex flex-col min-w-0 relative h-full transition-all duration-300 pb-16 md:pb-0 ${showSidebar ? 'md:pl-16' : 'md:pl-0'}`}>
         {/* Auth Overlay if not logged in */}
-        {!user && (
+        {!loading && !user && (
           <div className="absolute inset-0 bg-studio-bg/95 z-[100] flex flex-col items-center justify-center px-6 py-10 text-center overflow-y-auto">
              <div className="w-20 h-20 bg-studio-primary rounded-2xl flex items-center justify-center font-bold text-white text-4xl mb-8 shadow-[0_18px_50px_rgba(0,0,0,0.35)]">
                S1

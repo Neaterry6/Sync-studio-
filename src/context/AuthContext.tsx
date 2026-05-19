@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { onAuthStateChanged, User, signInWithPopup, GoogleAuthProvider, signOut } from 'firebase/auth';
+import { onAuthStateChanged, User, signInWithPopup, GoogleAuthProvider, signOut, signInWithRedirect, getRedirectResult } from 'firebase/auth';
 import { auth } from '../lib/firebase';
 
 interface AuthContextType {
@@ -23,12 +23,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     
     return () => unsubscribe();
   }, []);
+  useEffect(() => {
+    const consumeRedirectResult = async () => {
+      try {
+        await getRedirectResult(auth);
+      } catch (e) {
+        console.error('Redirect Login Error:', e);
+      }
+    };
+
+    consumeRedirectResult();
+  }, []);
+
 
   const login = async () => {
+    const provider = new GoogleAuthProvider();
+
     try {
-      const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
     } catch (e) {
+      const authError = e as { code?: string };
+      const shouldFallbackToRedirect = authError.code === 'auth/popup-blocked' || authError.code === 'auth/cancelled-popup-request';
+
+      if (shouldFallbackToRedirect) {
+        await signInWithRedirect(auth, provider);
+        return;
+      }
+
       console.error("Login Error:", e);
       alert("Login failed. Check console for details.");
     }

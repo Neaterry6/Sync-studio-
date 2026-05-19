@@ -13,9 +13,9 @@ export function Mixer() {
         >
           {/* Level Meter */}
           <div className="flex-1 bg-black/40 border border-white/5 rounded-lg flex items-end justify-center p-1 gap-0.5 relative overflow-hidden group">
-            <div className={`absolute top-0 bottom-0 left-0 right-0 opacity-10 bg-gradient-to-t from-transparent via-studio-audio to-studio-audio`} />
+            <div className={`absolute top-0 bottom-0 left-0 right-0 opacity-10 bg-gradient-to-t from-transparent via-studio-primary to-studio-primary`} />
             <div 
-              className={`w-full transition-all duration-75 rounded-t-sm bg-studio-audio/80`} 
+              className={`w-full transition-all duration-75 rounded-t-sm bg-studio-primary/65`} 
               style={{ height: `${Math.max(0, 100 + (track.volume * 2))}%` }}
             />
             {/* Markers */}
@@ -33,13 +33,13 @@ export function Mixer() {
             <div className="flex gap-1">
               <button 
                 onClick={() => updateTrack(track.id, { solo: !track.solo })}
-                className={`flex-1 text-[8px] md:text-[9px] font-bold py-1.5 rounded-md transition-all ${track.solo ? 'bg-yellow-500 text-black shadow-lg shadow-yellow-500/20' : 'bg-studio-surface text-slate-500 hover:text-slate-300'}`}
+                className={`flex-1 text-[8px] md:text-[9px] font-bold py-1.5 rounded-md transition-all ${track.solo ? 'bg-studio-video/80 text-black shadow-md shadow-black/20' : 'bg-studio-surface text-slate-500 hover:text-slate-300'}`}
               >
                 S
               </button>
               <button 
                 onClick={() => updateTrack(track.id, { muted: !track.muted })}
-                className={`flex-1 text-[8px] md:text-[9px] font-bold py-1.5 rounded-md transition-all ${track.muted ? 'bg-danger text-white shadow-lg shadow-danger/20' : 'bg-studio-surface text-slate-500 hover:text-slate-300'}`}
+                className={`flex-1 text-[8px] md:text-[9px] font-bold py-1.5 rounded-md transition-all ${track.muted ? 'bg-danger/80 text-white shadow-md shadow-black/20' : 'bg-studio-surface text-slate-500 hover:text-slate-300'}`}
               >
                 M
               </button>
@@ -61,7 +61,7 @@ export function Mixer() {
             </div>
 
             <div className="text-center truncate">
-              <span className={`text-[8px] md:text-[9px] font-bold uppercase tracking-tighter ${track.type === 'video' ? 'text-studio-video' : 'text-studio-audio'}`}>
+              <span className={`text-[8px] md:text-[9px] font-bold uppercase tracking-tighter ${track.type === 'video' ? 'text-studio-video' : 'text-studio-primary'}`}>
                 {track.name}
               </span>
             </div>
@@ -73,7 +73,7 @@ export function Mixer() {
       <div className="flex flex-col w-16 md:w-20 flex-shrink-0 ml-auto border-l border-white/5 pl-4">
           <div className="flex-1 bg-black/40 border border-white/5 rounded-lg flex items-end justify-center p-1 gap-0.5 relative overflow-hidden group">
             <div className="absolute top-0 bottom-0 left-0 right-0 opacity-10 bg-gradient-to-t from-transparent via-studio-primary to-studio-primary" />
-            <div className="w-full h-[60%] bg-studio-primary/80 transition-all rounded-t-sm" />
+            <div className="w-full h-[60%] bg-studio-primary/65 transition-all rounded-t-sm" />
           </div>
           <div className="mt-2 flex flex-col gap-2">
             <div className="h-[26px]" />
@@ -92,18 +92,18 @@ export function Mixer() {
          <span className="text-[10px] uppercase tracking-widest text-slate-600 font-bold mb-1">Inserts & AI Tools</span>
          
          {/* Voice Cleaner Module (AI) */}
-         <div className="bg-studio-audio/10 border border-studio-audio/20 rounded-xl p-3 space-y-3 group hover:bg-studio-audio/20 transition-all">
+         <div className="bg-studio-primary/10 border border-studio-primary/20 rounded-xl p-3 space-y-3 group hover:bg-studio-primary/15 transition-all">
             <div className="flex items-center justify-between">
                <div className="flex items-center gap-2">
-                  <Activity size={14} className="text-studio-audio" />
+                  <Activity size={14} className="text-studio-primary" />
                   <span className="text-[10px] font-bold uppercase tracking-widest">Voice Cleaner</span>
                </div>
-               <button className="text-[8px] bg-studio-audio text-white px-2 py-0.5 rounded-full font-bold">AI</button>
+               <button className="text-[8px] bg-studio-primary text-white px-2 py-0.5 rounded-full font-bold">AI</button>
             </div>
             <p className="text-[8px] text-slate-500 leading-tight">Remove background noise and room reverb automatically using RNNoise.</p>
             <div className="flex items-center gap-2">
                <div className="flex-1 h-1 bg-black/40 rounded-full overflow-hidden">
-                  <div className="h-full bg-studio-audio w-3/4" />
+                  <div className="h-full bg-studio-primary w-3/4" />
                </div>
                <span className="text-[8px] font-mono text-slate-500">75%</span>
             </div>

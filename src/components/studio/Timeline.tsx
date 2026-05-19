@@ -10,9 +10,9 @@ export function Timeline() {
 
   const getTrackColor = (type: string) => {
     switch (type) {
-      case 'audio': return 'bg-studio-primary/40 border-studio-primary/80 text-white';
-      case 'video': return 'bg-studio-video/20 border-studio-video/50 text-studio-video';
-      case 'image': return 'bg-studio-design/20 border-studio-design/50 text-studio-design';
+      case 'audio': return 'bg-studio-primary/25 border-studio-primary/45 text-slate-100';
+      case 'video': return 'bg-studio-video/15 border-studio-video/35 text-slate-100';
+      case 'image': return 'bg-studio-design/15 border-studio-design/35 text-slate-100';
       default: return 'bg-slate-800/20 border-slate-500/50 text-slate-400';
     }
   };
@@ -26,23 +26,23 @@ export function Timeline() {
   return (
     <div id="timeline-area" className="flex-1 overflow-hidden flex flex-col">
       {/* Current Track Label Info */}
-      <div className="h-10 px-4 flex items-center justify-between border-b border-white/5 bg-studio-bg shrink-0">
+      <div className="min-h-10 px-3 sm:px-4 py-1.5 flex items-center justify-between gap-3 border-b border-white/5 bg-studio-bg shrink-0">
         <div className="flex items-center gap-2">
           <Mic size={14} className="text-studio-primary" />
           <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
             {tracks.find(t => t.armed)?.name || "No track armed"}
           </span>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4">
            <div className="flex items-center gap-2">
-              <span className="text-[10px] text-slate-600 font-bold uppercase">Zoom</span>
+              <span className="hidden sm:inline text-[10px] text-slate-600 font-bold uppercase">Zoom</span>
               <input 
                 type="range" 
                 min="20" 
                 max="200" 
                 value={zoom} 
                 onChange={(e) => setZoom(parseInt(e.target.value))}
-                className="w-24 accent-studio-primary bg-white/5 rounded-full h-1 appearance-none"
+                className="w-20 sm:w-24 accent-studio-primary bg-white/5 rounded-full h-1 appearance-none"
               />
            </div>
            <button className="text-slate-600 hover:text-white transition-colors">
@@ -93,7 +93,7 @@ export function Timeline() {
                 initial={{ scale: 0.9, opacity: 0, y: 10 }}
                 animate={{ scale: 1, opacity: 1, y: 0 }}
                 exit={{ scale: 0.9, opacity: 0, y: 10 }}
-                className="absolute top-10 left-10 z-[100] w-64 bg-studio-surface border border-white/10 rounded-2xl shadow-2xl p-4 flex flex-col gap-4 backdrop-blur-xl"
+                className="absolute inset-x-3 top-10 z-[100] sm:left-10 sm:right-auto w-auto sm:w-64 bg-studio-surface border border-white/10 rounded-2xl shadow-2xl p-4 flex flex-col gap-4 backdrop-blur-xl"
               >
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Edit Clip</span>
@@ -179,7 +179,7 @@ export function Timeline() {
                         e.stopPropagation();
                         setEditingClip({ trackId: track.id, clipId: clip.id });
                       }}
-                      className={`absolute top-2 bottom-2 rounded-lg border glass ${getTrackColor(track.type)} ${editingClip?.clipId === clip.id ? 'ring-2 ring-studio-primary border-transparent' : ''} flex flex-col justify-center px-3 cursor-grab active:cursor-grabbing hover:scale-[1.01] transition-all duration-200 z-10 shadow-2xl overflow-hidden group/clip`}
+                      className={`absolute top-2 bottom-2 rounded-lg border glass ${getTrackColor(track.type)} ${editingClip?.clipId === clip.id ? 'ring-2 ring-studio-primary/70 border-transparent' : ''} flex flex-col justify-center px-3 cursor-grab active:cursor-grabbing hover:scale-[1.01] transition-all duration-200 z-10 shadow-lg shadow-black/20 overflow-hidden group/clip`}
                       style={{ 
                         left: `${clip.startTime * zoom}px`, 
                         width: `${clip.duration * zoom}px` 
@@ -233,7 +233,7 @@ export function Timeline() {
                             {Array.from({ length: Math.floor(clip.duration * 2) }).map((_, i) => {
                               const h = 30 + Math.random() * 70;
                               const scaledH = h * (1 + (clip.volume || 0) / 40);
-                              return <div key={i} className="bg-white/40 w-[2px] rounded-full" style={{ height: `${scaledH}%` }} />;
+                              return <div key={i} className="bg-white/30 w-[2px] rounded-full" style={{ height: `${scaledH}%` }} />;
                             })}
                          </div>
                       </div>
@@ -245,7 +245,7 @@ export function Timeline() {
 
             {/* Playhead */}
             <div 
-              className="absolute top-0 bottom-0 w-[2px] bg-white z-30 pointer-events-none shadow-[0_0_20px_rgba(255,255,255,0.5)]"
+              className="absolute top-0 bottom-0 w-[2px] bg-slate-200 z-30 pointer-events-none shadow-[0_0_16px_rgba(255,255,255,0.28)]"
               style={{ left: `${currentTime * zoom}px` }}
             >
               <div className="w-3 h-3 bg-white absolute -top-1 -left-[5px] rounded-full" />

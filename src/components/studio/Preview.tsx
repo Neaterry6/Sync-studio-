@@ -11,15 +11,15 @@ export function Preview({ type }: PreviewProps) {
 
   // Simulation of content based on type
   return (
-    <div id="preview-window" className="w-full h-full flex flex-col items-center justify-center relative bg-studio-bg rounded-2xl overflow-hidden shadow-2xl border border-white/5">
+    <div id="preview-window" className="w-full h-full flex flex-col items-center justify-center relative bg-studio-surface/45 rounded-xl sm:rounded-2xl overflow-hidden shadow-lg shadow-black/25 border border-white/5">
       {/* Viewport Meta Controls */}
-      <div className="absolute top-3 right-3 sm:top-4 sm:right-4 flex items-center gap-2 z-10">
-        <button className="p-2.5 bg-studio-surface/80 backdrop-blur-md rounded-xl text-slate-500 hover:text-white transition-all border border-white/5 shadow-xl hover:scale-105 active:scale-95">
+      <div className="absolute top-2 right-2 sm:top-4 sm:right-4 flex items-center gap-2 z-10">
+        <button className="p-2 bg-studio-surface/80 backdrop-blur-md rounded-xl text-slate-500 hover:text-white transition-all border border-white/5 shadow-lg hover:scale-105 active:scale-95">
           <Maximize2 size={16} />
         </button>
       </div>
 
-      <div className="absolute bottom-3 sm:bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 sm:gap-6 px-4 sm:px-6 py-2 sm:py-2.5 bg-studio-surface/80 backdrop-blur-xl rounded-full text-slate-500 border border-white/5 z-10 shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
+      <div className="absolute bottom-2 sm:bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 sm:gap-6 px-3 sm:px-6 py-2 sm:py-2.5 bg-studio-surface/85 backdrop-blur-xl rounded-full text-slate-500 border border-white/5 z-10 shadow-lg shadow-black/25">
         <button className="hover:text-white transition-colors"><ZoomOut size={18} /></button>
         <span className="text-xs font-mono font-bold w-12 text-center text-studio-primary tracking-tighter">100%</span>
         <button className="hover:text-white transition-colors"><ZoomIn size={18} /></button>
@@ -34,15 +34,15 @@ export function Preview({ type }: PreviewProps) {
            initial={{ opacity: 0, scale: 0.95 }}
            animate={{ opacity: 1, scale: 1 }}
            exit={{ opacity: 0, scale: 1.05 }}
-           className="w-full h-full flex items-center justify-center p-4 sm:p-8 md:p-12 relative"
+           className="w-full h-full flex items-center justify-center p-3 sm:p-8 md:p-12 relative"
         >
           {type === 'audio' && (
-            <div className="w-full max-w-2xl h-32 sm:h-48 md:h-64 flex items-center justify-center gap-1 sm:gap-1.5 overflow-hidden">
+            <div className="w-full max-w-2xl h-28 sm:h-48 md:h-64 flex items-center justify-center gap-1 sm:gap-1.5 overflow-hidden opacity-90">
                {/* Linear visualizer simulation with studio-audio color */}
                {Array.from({ length: 96 }).map((_, i) => (
                  <motion.div 
                    key={i}
-                   className="w-0.5 sm:w-1 bg-gradient-to-t from-studio-audio/20 via-studio-audio to-studio-audio/40 rounded-full shadow-[0_0_10px_rgba(0,217,255,0.2)]"
+                   className="w-0.5 sm:w-1 bg-gradient-to-t from-studio-primary/10 via-studio-primary/70 to-studio-primary/25 rounded-full"
                    animate={{ height: [`${20 + Math.random() * 80}%`, `${10 + Math.random() * 90}%`] }}
                    transition={{ repeat: Infinity, duration: 0.4 + Math.random() * 0.4, ease: "easeInOut" }}
                  />
@@ -51,7 +51,7 @@ export function Preview({ type }: PreviewProps) {
           )}
 
           {type === 'video' && (
-            <div className="w-full max-w-4xl aspect-video bg-[#020305] rounded-xl shadow-[0_24px_48px_rgba(0,0,0,0.8)] border border-white/5 flex items-center justify-center group overflow-hidden relative">
+            <div className="w-full max-w-4xl aspect-video bg-[#0B0E13] rounded-xl shadow-lg shadow-black/30 border border-white/5 flex items-center justify-center group overflow-hidden relative">
               <div className="absolute inset-0 bg-gradient-to-br from-studio-video/5 to-transparent pointer-events-none" />
               <div className="text-slate-800 flex flex-col items-center">
                  <div className="w-16 h-16 rounded-3xl border-2 border-white/5 flex items-center justify-center mb-6 shadow-inner">
@@ -66,13 +66,13 @@ export function Preview({ type }: PreviewProps) {
           )}
 
           {type === 'photo' || type === 'design' ? (
-            <div className="w-full max-w-2xl aspect-square bg-studio-surface border border-white/5 rounded-2xl shadow-[0_32px_64px_rgba(0,0,0,0.6)] flex items-center justify-center relative overflow-hidden">
+            <div className="w-full max-w-2xl max-h-full aspect-square bg-studio-surface border border-white/5 rounded-2xl shadow-lg shadow-black/30 flex items-center justify-center relative overflow-hidden">
                {/* Pattern for transparency */}
                <div className="absolute inset-0 opacity-[0.03] bg-[radial-gradient(white_1px,transparent_1px)] [background-size:24px_24px]" />
                
                {type === 'design' && (
                  <motion.div 
-                   className="w-48 h-48 md:w-64 md:h-64 border-2 border-studio-design flex items-center justify-center relative glass"
+                   className="w-36 h-36 sm:w-48 sm:h-48 md:w-64 md:h-64 border border-studio-design/60 flex items-center justify-center relative glass"
                    drag
                    dragConstraints={{ left: -200, right: 200, top: -200, bottom: 200 }}
                  >

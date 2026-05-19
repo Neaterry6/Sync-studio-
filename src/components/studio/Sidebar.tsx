@@ -27,11 +27,11 @@ export function Sidebar({ activeTab, setActiveTab, onProfile, onSettings, isVisi
       id="sidebar-nav" 
       initial={false}
       transition={{ duration: 0.3, ease: "easeInOut" }}
-      className={`fixed bottom-0 left-0 right-0 h-16 md:top-0 md:right-auto md:h-screen md:w-16 border-t md:border-t-0 md:border-r border-white/5 bg-studio-bg flex md:flex-col items-center py-0 md:py-6 px-2 sm:px-4 md:px-0 gap-2 md:gap-8 z-[60] overflow-hidden transition-transform duration-300 ${
+      className={`fixed bottom-0 left-0 right-0 h-16 md:top-0 md:right-auto md:h-screen md:w-16 border-t md:border-t-0 md:border-r border-white/5 bg-studio-bg/95 backdrop-blur-xl flex md:flex-col items-center py-0 md:py-6 px-2 sm:px-4 md:px-0 gap-2 md:gap-8 z-[60] overflow-hidden transition-transform duration-300 ${
         isVisible ? 'translate-y-0 md:translate-x-0' : 'translate-y-full md:translate-y-0 md:-translate-x-full pointer-events-none opacity-0'
       }`}
     >
-      <div className="hidden md:flex w-10 h-10 bg-studio-primary rounded-lg items-center justify-center font-bold text-white text-xl mb-4 shadow-[0_0_20px_rgba(255,59,48,0.3)]">
+      <div className="hidden md:flex w-10 h-10 bg-studio-primary rounded-lg items-center justify-center font-bold text-white text-xl mb-4 shadow-[0_12px_30px_rgba(0,0,0,0.35)]">
         S1
       </div>
 
@@ -41,7 +41,7 @@ export function Sidebar({ activeTab, setActiveTab, onProfile, onSettings, isVisi
             key={item.id}
             onClick={() => setActiveTab(item.id)}
             className={`group relative p-2.5 sm:p-3 rounded-xl transition-all ${
-              activeTab === item.id ? "bg-studio-primary/20 text-studio-primary" : "text-slate-600 hover:text-slate-300"
+              activeTab === item.id ? "bg-studio-primary/10 text-studio-primary" : "text-slate-600 hover:text-slate-300"
             }`}
           >
             <item.icon size={22} className="md:w-[24px] md:h-[24px]" />

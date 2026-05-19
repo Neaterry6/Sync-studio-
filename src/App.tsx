@@ -34,7 +34,7 @@ export default function App() {
   const { isPlaying, setIsPlaying, currentTime, setCurrentTime, tracks, addClip } = useTimelineStore();
   const [activeTab, setActiveTab] = useState<"audio" | "video" | "photo" | "design">("audio");
   const [showMixer, setShowMixer] = useState(false);
-  const [showLibrary, setShowLibrary] = useState(true);
+  const [showLibrary, setShowLibrary] = useState(() => typeof window === "undefined" ? true : window.innerWidth >= 768);
   const [showSidebar, setShowSidebar] = useState(true);
   const [showProfile, setShowProfile] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -45,6 +45,19 @@ export default function App() {
   const [recordingStartTime, setRecordingStartTime] = useState(0);
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isAppInstalled, setIsAppInstalled] = useState(false);
+
+
+  useEffect(() => {
+    const syncPanelsToViewport = () => {
+      if (window.innerWidth < 768) {
+        setShowLibrary(false);
+      }
+    };
+
+    syncPanelsToViewport();
+    window.addEventListener('resize', syncPanelsToViewport);
+    return () => window.removeEventListener('resize', syncPanelsToViewport);
+  }, []);
 
   useEffect(() => {
     const handleBeforeInstallPrompt = (event: Event) => {
@@ -165,7 +178,7 @@ export default function App() {
   }
 
   return (
-    <div id="studio-app" className="flex h-[100dvh] min-h-[520px] bg-studio-bg text-white font-sans selection:bg-studio-primary selection:text-white overflow-hidden">
+    <div id="studio-app" className="flex h-[100dvh] min-h-[520px] bg-studio-bg text-white font-sans selection:bg-studio-primary/70 selection:text-white overflow-hidden">
       {/* Sidebar - Navigation (Top/Side on Desktop, Bottom on Mobile) */}
       <Sidebar 
         activeTab={activeTab} 
@@ -180,7 +193,7 @@ export default function App() {
         {/* Auth Overlay if not logged in */}
         {!user && (
           <div className="absolute inset-0 bg-studio-bg/95 z-[100] flex flex-col items-center justify-center px-6 py-10 text-center overflow-y-auto">
-             <div className="w-20 h-20 bg-studio-primary rounded-2xl flex items-center justify-center font-bold text-white text-4xl mb-8 shadow-[0_0_50px_rgba(124,58,237,0.4)]">
+             <div className="w-20 h-20 bg-studio-primary rounded-2xl flex items-center justify-center font-bold text-white text-4xl mb-8 shadow-[0_18px_50px_rgba(0,0,0,0.35)]">
                S1
              </div>
              <h1 className="text-3xl sm:text-4xl font-bold tracking-tighter mb-4 uppercase">Studio One</h1>
@@ -238,7 +251,7 @@ export default function App() {
                 initial={{ opacity: 0, x: -24 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -24 }}
-                className="absolute inset-x-0 top-0 bottom-0 w-full md:relative md:inset-auto md:w-[300px] md:max-w-[32vw] border-r border-[#222] bg-[#151515] overflow-hidden flex flex-col z-40 shadow-2xl md:shadow-none"
+                className="absolute inset-x-2 top-2 h-[44dvh] min-h-[260px] max-h-[420px] rounded-2xl border border-white/10 bg-studio-surface overflow-hidden flex flex-col z-40 shadow-2xl md:relative md:inset-auto md:h-auto md:min-h-0 md:max-h-none md:w-[300px] md:max-w-[32vw] md:rounded-none md:border-y-0 md:border-l-0 md:border-r md:border-white/5 md:bg-studio-surface md:shadow-none"
               >
                 <Library />
               </motion.div>
@@ -246,14 +259,14 @@ export default function App() {
           </AnimatePresence>
 
           {/* Center Column: Preview & Timeline */}
-          <div className="flex-1 flex flex-col min-w-0 bg-[#0a0a0a]">
+          <div className="flex-1 flex flex-col min-w-0 bg-studio-bg">
             {/* Preview Window (Top half) */}
-            <div className="min-h-[180px] flex-[1_1_45%] relative bg-black flex items-center justify-center p-3 sm:p-4 md:p-8 overflow-hidden">
+            <div className="min-h-[150px] flex-[1_1_44%] relative bg-studio-bg flex items-center justify-center p-2 sm:p-4 md:p-8 overflow-hidden">
               <Preview type={activeTab} />
             </div>
 
             {/* Timeline (Bottom half) */}
-            <div className="h-[42svh] min-h-[240px] max-h-[380px] md:h-[350px] border-t border-[#222] bg-[#111] flex flex-col">
+            <div className="h-[46svh] min-h-[220px] max-h-[390px] md:h-[350px] border-t border-white/5 bg-studio-surface/40 flex flex-col">
               <Timeline currentTime={currentTime} setCurrentTime={setCurrentTime} />
             </div>
           </div>
@@ -266,7 +279,7 @@ export default function App() {
               initial={{ height: 0 }}
               animate={{ height: 'min(420px, 70dvh)' }}
               exit={{ height: 0 }}
-              className="absolute md:relative bottom-0 left-0 right-0 z-40 border-t border-[#222] bg-[#151515] overflow-hidden shadow-2xl md:shadow-none"
+              className="absolute md:relative bottom-0 left-0 right-0 z-40 border-t border-white/10 bg-studio-surface overflow-hidden shadow-2xl md:shadow-none"
             >
               <Mixer />
             </motion.div>
@@ -293,10 +306,10 @@ export default function App() {
                 onClick={handleToggleRecord}
                 className={`relative w-12 h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center transition-all ${
                   isRecording 
-                    ? 'bg-white text-studio-primary scale-110 shadow-[0_0_30px_rgba(255,255,255,0.4)]' 
+                    ? 'bg-white text-studio-primary scale-110 shadow-[0_0_24px_rgba(255,255,255,0.22)]' 
                     : micActive
-                    ? 'bg-studio-primary text-white scale-105 shadow-[0_0_20px_rgba(255,59,48,0.6)] animate-pulse'
-                    : 'bg-studio-primary text-white hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(255,59,48,0.4)]'
+                    ? 'bg-studio-primary text-white scale-105 shadow-[0_0_20px_rgba(139,155,180,0.35)] animate-pulse'
+                    : 'bg-studio-primary text-white hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(139,155,180,0.28)]'
                 }`}
               >
                 {isRecording ? <Square size={20} className="md:w-[24px] md:h-[24px]" fill="currentColor" /> : <div className="w-4 h-4 md:w-5 md:h-5 bg-white rounded-full" />}

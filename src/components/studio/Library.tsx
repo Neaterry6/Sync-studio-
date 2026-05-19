@@ -1,5 +1,5 @@
 import { Search, Music, Video, Image as ImageIcon, Sparkles, Upload, MoreVertical } from "lucide-react";
-import { useState, useRef } from "react";
+import { type ChangeEvent, useState, useRef } from "react";
 import { useTimelineStore } from "../../store/useTimelineStore";
 import { audioEngine } from "../../lib/studio/audioEngine";
 
@@ -9,7 +9,7 @@ export function Library() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { addClip, tracks } = useTimelineStore();
 
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -30,7 +30,9 @@ export function Library() {
           type: 'audio',
           startTime: 0,
           duration: 30, // Default duration, in a real app we'd get this from the buffer
-          sourceUrl: url
+          sourceUrl: url,
+          volume: 0,
+          offset: 0
         });
       }
     }

@@ -1,0 +1,20 @@
+{
+  "name": "Studio One",
+  "short_name": "Studio One",
+  "description": "A responsive browser studio for recording, mixing, editing video, and managing creative assets.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0A0B0F",
+  "theme_color": "#7C3AED",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["music", "multimedia", "productivity"]
+}

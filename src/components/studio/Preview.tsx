@@ -13,13 +13,13 @@ export function Preview({ type }: PreviewProps) {
   return (
     <div id="preview-window" className="w-full h-full flex flex-col items-center justify-center relative bg-studio-bg rounded-2xl overflow-hidden shadow-2xl border border-white/5">
       {/* Viewport Meta Controls */}
-      <div className="absolute top-4 right-4 flex items-center gap-2 z-10">
+      <div className="absolute top-3 right-3 sm:top-4 sm:right-4 flex items-center gap-2 z-10">
         <button className="p-2.5 bg-studio-surface/80 backdrop-blur-md rounded-xl text-slate-500 hover:text-white transition-all border border-white/5 shadow-xl hover:scale-105 active:scale-95">
           <Maximize2 size={16} />
         </button>
       </div>
 
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-6 px-6 py-2.5 bg-studio-surface/80 backdrop-blur-xl rounded-full text-slate-500 border border-white/5 z-10 shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
+      <div className="absolute bottom-3 sm:bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 sm:gap-6 px-4 sm:px-6 py-2 sm:py-2.5 bg-studio-surface/80 backdrop-blur-xl rounded-full text-slate-500 border border-white/5 z-10 shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
         <button className="hover:text-white transition-colors"><ZoomOut size={18} /></button>
         <span className="text-xs font-mono font-bold w-12 text-center text-studio-primary tracking-tighter">100%</span>
         <button className="hover:text-white transition-colors"><ZoomIn size={18} /></button>
@@ -34,15 +34,15 @@ export function Preview({ type }: PreviewProps) {
            initial={{ opacity: 0, scale: 0.95 }}
            animate={{ opacity: 1, scale: 1 }}
            exit={{ opacity: 0, scale: 1.05 }}
-           className="w-full h-full flex items-center justify-center p-12 relative"
+           className="w-full h-full flex items-center justify-center p-4 sm:p-8 md:p-12 relative"
         >
           {type === 'audio' && (
-            <div className="w-full max-w-2xl h-64 flex items-center justify-center gap-1.5 overflow-hidden">
+            <div className="w-full max-w-2xl h-32 sm:h-48 md:h-64 flex items-center justify-center gap-1 sm:gap-1.5 overflow-hidden">
                {/* Linear visualizer simulation with studio-audio color */}
                {Array.from({ length: 96 }).map((_, i) => (
                  <motion.div 
                    key={i}
-                   className="w-1 bg-gradient-to-t from-studio-audio/20 via-studio-audio to-studio-audio/40 rounded-full shadow-[0_0_10px_rgba(0,217,255,0.2)]"
+                   className="w-0.5 sm:w-1 bg-gradient-to-t from-studio-audio/20 via-studio-audio to-studio-audio/40 rounded-full shadow-[0_0_10px_rgba(0,217,255,0.2)]"
                    animate={{ height: [`${20 + Math.random() * 80}%`, `${10 + Math.random() * 90}%`] }}
                    transition={{ repeat: Infinity, duration: 0.4 + Math.random() * 0.4, ease: "easeInOut" }}
                  />
@@ -74,12 +74,7 @@ export function Preview({ type }: PreviewProps) {
                  <motion.div 
                    className="w-48 h-48 md:w-64 md:h-64 border-2 border-studio-design flex items-center justify-center relative glass"
                    drag
-                   dragConstraints={{ 
-                     left: window.innerWidth < 768 ? -100 : -300, 
-                     right: window.innerWidth < 768 ? 100 : 300, 
-                     top: window.innerWidth < 768 ? -100 : -300, 
-                     bottom: window.innerWidth < 768 ? 100 : 300 
-                   }}
+                   dragConstraints={{ left: -200, right: 200, top: -200, bottom: 200 }}
                  >
                    <div className="w-2.5 h-2.5 bg-white absolute -top-1.5 -left-1.5 rounded-sm shadow-lg" />
                    <div className="w-2.5 h-2.5 bg-white absolute -top-1.5 -right-1.5 rounded-sm shadow-lg" />

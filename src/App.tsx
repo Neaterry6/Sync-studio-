@@ -8,13 +8,19 @@ import { Preview } from "./components/studio/Preview";
 import { UserModal } from "./components/studio/UserModal";
 import { GuidedTour } from "./components/studio/GuidedTour";
 import { motion, AnimatePresence } from "motion/react";
-import { Layers, Music, Video, User, Settings, FolderOpen, Save, Play, Square, SkipBack, SkipForward, Mic, Plus, SlidersHorizontal, RotateCcw, RotateCw, Zap } from "lucide-react";
+import { Download, Music, Play, SkipBack, SkipForward, SlidersHorizontal, Square, RotateCcw, RotateCw, Zap } from "lucide-react";
 import { useAuth } from "./context/AuthContext";
 import { useThemeStore } from "./store/useThemeStore";
 import { useTimelineStore } from "./store/useTimelineStore";
 import { audioEngine } from "./lib/studio/audioEngine";
 
 import { AdminDashboard } from "./components/admin/AdminDashboard";
+
+interface BeforeInstallPromptEvent extends Event {
+  readonly platforms: string[];
+  readonly userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
+  prompt: () => Promise<void>;
+}
 
 export default function App() {
   const { user, login } = useAuth();
@@ -25,11 +31,6 @@ export default function App() {
   }, [theme]);
 
   const isAdminPath = window.location.pathname === "/admin";
-
-  if (isAdminPath) {
-    return <AdminDashboard />;
-  }
-
   const { isPlaying, setIsPlaying, currentTime, setCurrentTime, tracks, addClip } = useTimelineStore();
   const [activeTab, setActiveTab] = useState<"audio" | "video" | "photo" | "design">("audio");
   const [showMixer, setShowMixer] = useState(false);
@@ -42,6 +43,30 @@ export default function App() {
   const [showTour, setShowTour] = useState(false);
   const [recordWithPlayback, setRecordWithPlayback] = useState(true);
   const [recordingStartTime, setRecordingStartTime] = useState(0);
+  const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [isAppInstalled, setIsAppInstalled] = useState(false);
+
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (event: Event) => {
+      event.preventDefault();
+      setInstallPrompt(event as BeforeInstallPromptEvent);
+    };
+    const handleAppInstalled = () => {
+      setInstallPrompt(null);
+      setIsAppInstalled(true);
+    };
+
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
+      (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
+    setIsAppInstalled(isStandalone);
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('appinstalled', handleAppInstalled);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', handleAppInstalled);
+    };
+  }, []);
 
   useEffect(() => {
     const visits = parseInt(localStorage.getItem('studio_one_visits') || '0');
@@ -76,6 +101,16 @@ export default function App() {
     await audioEngine.init();
     const active = await audioEngine.toggleMic();
     setMicActive(active);
+  };
+
+  const handleInstallApp = async () => {
+    if (!installPrompt) return;
+    await installPrompt.prompt();
+    const choice = await installPrompt.userChoice;
+    if (choice.outcome === "accepted") {
+      setInstallPrompt(null);
+      setIsAppInstalled(true);
+    }
   };
 
   const handleToggleRecord = async () => {
@@ -125,8 +160,12 @@ export default function App() {
     }
   };
 
+  if (isAdminPath) {
+    return <AdminDashboard />;
+  }
+
   return (
-    <div id="studio-app" className="flex flex-col md:flex-row h-screen bg-studio-bg text-white font-sans selection:bg-studio-primary selection:text-white overflow-hidden">
+    <div id="studio-app" className="flex h-[100dvh] min-h-[520px] bg-studio-bg text-white font-sans selection:bg-studio-primary selection:text-white overflow-hidden">
       {/* Sidebar - Navigation (Top/Side on Desktop, Bottom on Mobile) */}
       <Sidebar 
         activeTab={activeTab} 
@@ -137,19 +176,19 @@ export default function App() {
       />
 
       {/* Main Workspace */}
-      <main className={`flex-1 flex flex-col min-w-0 relative h-full transition-all duration-300 ${showSidebar ? 'md:pl-16' : 'md:pl-0'}`}>
+      <main className={`flex-1 flex flex-col min-w-0 relative h-full transition-all duration-300 pb-16 md:pb-0 ${showSidebar ? 'md:pl-16' : 'md:pl-0'}`}>
         {/* Auth Overlay if not logged in */}
         {!user && (
-          <div className="absolute inset-0 bg-studio-bg/95 z-[100] flex flex-col items-center justify-center p-12 text-center">
+          <div className="absolute inset-0 bg-studio-bg/95 z-[100] flex flex-col items-center justify-center px-6 py-10 text-center overflow-y-auto">
              <div className="w-20 h-20 bg-studio-primary rounded-2xl flex items-center justify-center font-bold text-white text-4xl mb-8 shadow-[0_0_50px_rgba(124,58,237,0.4)]">
                S1
              </div>
-             <h1 className="text-4xl font-bold tracking-tighter mb-4 uppercase">Studio One</h1>
+             <h1 className="text-3xl sm:text-4xl font-bold tracking-tighter mb-4 uppercase">Studio One</h1>
              <p className="text-slate-400 max-w-md mb-8">
                A unified professional studio for music, video, and design. 
                Sign in to sync your projects and access cloud tools.
              </p>
-             <div className="flex flex-col sm:flex-row gap-4">
+             <div className="flex w-full max-w-md flex-col sm:flex-row gap-4">
                <button 
                  onClick={login}
                  className="bg-studio-primary text-white px-8 py-3 rounded-full font-bold uppercase tracking-widest hover:bg-studio-primary-hover transition-all hover:scale-105 active:scale-95 shadow-[0_4px_20px_rgba(0,0,0,0.4)]"
@@ -165,6 +204,15 @@ export default function App() {
                >
                  Take a Tour
                </button>
+               {installPrompt && !isAppInstalled && (
+                 <button
+                   onClick={handleInstallApp}
+                   className="inline-flex items-center justify-center gap-2 bg-white text-studio-bg px-8 py-3 rounded-full font-bold uppercase tracking-widest hover:bg-slate-200 transition-all hover:scale-105 active:scale-95"
+                 >
+                   <Download size={16} />
+                   Install App
+                 </button>
+               )}
              </div>
              <p className="mt-8 text-[10px] uppercase tracking-widest text-slate-700">
                v1.2.0 Stable | Professional Edition
@@ -177,19 +225,20 @@ export default function App() {
           onToggleSidebar={() => setShowSidebar(!showSidebar)} 
           onToggleLibrary={() => setShowLibrary(!showLibrary)}
           showLibrary={showLibrary}
+          onInstallApp={installPrompt && !isAppInstalled ? handleInstallApp : undefined}
         />
 
         {/* Dynamic Center Area */}
-        <div className="flex-1 flex overflow-hidden">
+        <div className="flex-1 flex min-h-0 overflow-hidden">
           {/* Asset Library (Left Drawer style) */}
           <AnimatePresence>
             {showLibrary && (
               <motion.div
                 id="library-sidebar"
-                initial={{ width: 0, opacity: 0 }}
-                animate={{ width: window.innerWidth < 768 ? '100%' : 300, opacity: 1 }}
-                exit={{ width: 0, opacity: 0 }}
-                className="absolute inset-0 md:relative md:w-auto border-r border-[#222] bg-[#151515] overflow-hidden flex flex-col z-40"
+                initial={{ opacity: 0, x: -24 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -24 }}
+                className="absolute inset-x-0 top-0 bottom-0 w-full md:relative md:inset-auto md:w-[300px] md:max-w-[32vw] border-r border-[#222] bg-[#151515] overflow-hidden flex flex-col z-40 shadow-2xl md:shadow-none"
               >
                 <Library />
               </motion.div>
@@ -199,12 +248,12 @@ export default function App() {
           {/* Center Column: Preview & Timeline */}
           <div className="flex-1 flex flex-col min-w-0 bg-[#0a0a0a]">
             {/* Preview Window (Top half) */}
-            <div className="flex-1 relative bg-black flex items-center justify-center p-4 md:p-8 overflow-hidden">
+            <div className="min-h-[180px] flex-[1_1_45%] relative bg-black flex items-center justify-center p-3 sm:p-4 md:p-8 overflow-hidden">
               <Preview type={activeTab} />
             </div>
 
             {/* Timeline (Bottom half) */}
-            <div className="h-[300px] md:h-[350px] border-t border-[#222] bg-[#111] flex flex-col">
+            <div className="h-[42svh] min-h-[240px] max-h-[380px] md:h-[350px] border-t border-[#222] bg-[#111] flex flex-col">
               <Timeline currentTime={currentTime} setCurrentTime={setCurrentTime} />
             </div>
           </div>
@@ -215,9 +264,9 @@ export default function App() {
           {showMixer && (
             <motion.div
               initial={{ height: 0 }}
-              animate={{ height: window.innerWidth < 768 ? '100%' : 250 }}
+              animate={{ height: 'min(420px, 70dvh)' }}
               exit={{ height: 0 }}
-              className="absolute md:relative bottom-0 left-0 right-0 z-40 border-t border-[#222] bg-[#151515] overflow-hidden"
+              className="absolute md:relative bottom-0 left-0 right-0 z-40 border-t border-[#222] bg-[#151515] overflow-hidden shadow-2xl md:shadow-none"
             >
               <Mixer />
             </motion.div>
@@ -225,8 +274,8 @@ export default function App() {
         </AnimatePresence>
 
         {/* Bottom Transport Bar - Modern Floating Style */}
-        <footer id="transport-bar" className="absolute bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-2 md:gap-4 bg-studio-surface/80 backdrop-blur-2xl px-4 md:px-6 py-2 md:py-3 rounded-full border border-white/5 shadow-[0_20px_50px_rgba(0,0,0,0.5)] z-50 max-w-[95vw]">
-          <div className="flex items-center gap-3 md:gap-6">
+        <footer id="transport-bar" className="absolute bottom-20 md:bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-2 md:gap-4 bg-studio-surface/85 backdrop-blur-2xl px-3 sm:px-4 md:px-6 py-2 md:py-3 rounded-full border border-white/5 shadow-[0_20px_50px_rgba(0,0,0,0.5)] z-50 max-w-[calc(100vw-1rem)] overflow-x-auto no-scrollbar">
+          <div className="flex items-center gap-2 sm:gap-3 md:gap-6">
             <button className={`text-slate-500 hover:text-white transition-colors ${showMixer ? 'text-studio-primary' : ''}`} onClick={() => setShowMixer(!showMixer)}>
               <SlidersHorizontal size={18} className="md:w-[20px] md:h-[20px]" />
             </button>

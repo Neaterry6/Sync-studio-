@@ -1,24 +1,25 @@
-import { FolderOpen, Save, Cloud, CloudOff, Share2, Plus, ChevronDown, SkipBack, Music, Settings, Menu } from "lucide-react";
+import { Cloud, Download, FolderOpen, Plus, SkipBack, Music, Settings, Menu } from "lucide-react";
 import { useProject } from "../../context/ProjectContext";
 import { useAuth } from "../../context/AuthContext";
 import { useTimelineStore } from "../../store/useTimelineStore";
-import { useRef } from "react";
+import { type ChangeEvent, useRef } from "react";
 
 interface ToolbarProps {
   onToggleSidebar?: () => void;
   onToggleLibrary?: () => void;
   showLibrary?: boolean;
+  onInstallApp?: () => void;
 }
 
-export function Toolbar({ onToggleSidebar, onToggleLibrary, showLibrary }: ToolbarProps) {
+export function Toolbar({ onToggleSidebar, onToggleLibrary, showLibrary, onInstallApp }: ToolbarProps) {
   const { project, saveProject, createNew } = useProject();
   const { user } = useAuth();
   const { tracks, addClip, addTrack, currentTime } = useTimelineStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isOnline = !!user;
 
-  const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
+  const handleImport = (e: ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from<File>(e.target.files || []);
     files.forEach(file => {
       const type = file.type.split('/')[0] as 'audio' | 'video' | 'image';
       // Find a track of matching type
@@ -55,7 +56,7 @@ export function Toolbar({ onToggleSidebar, onToggleLibrary, showLibrary }: Toolb
   };
 
   return (
-    <header id="toolbar-main" className="h-16 border-b border-white/5 bg-studio-bg flex items-center justify-between px-6 z-20">
+    <header id="toolbar-main" className="min-h-16 border-b border-white/5 bg-studio-bg flex flex-wrap sm:flex-nowrap items-center justify-between gap-2 px-3 sm:px-4 md:px-6 py-2 z-20">
       <input 
         type="file" 
         ref={fileInputRef} 
@@ -65,7 +66,7 @@ export function Toolbar({ onToggleSidebar, onToggleLibrary, showLibrary }: Toolb
         onChange={handleImport}
       />
       
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-3 min-w-0">
         <button 
           onClick={onToggleSidebar}
           className="p-2 hover:bg-studio-hover rounded-lg text-slate-400 hover:text-white transition-colors border border-transparent hover:border-white/5"
@@ -87,7 +88,7 @@ export function Toolbar({ onToggleSidebar, onToggleLibrary, showLibrary }: Toolb
         <div className="font-mono text-xs text-slate-500 tabular-nums">00:00.5</div>
       </div>
 
-      <div className="flex items-center bg-studio-surface border border-white/5 p-1 rounded-xl gap-1">
+      <div className="order-3 w-full justify-center sm:order-none sm:w-auto flex items-center bg-studio-surface border border-white/5 p-1 rounded-xl gap-1">
         <div className="flex items-center px-3 py-1.5 gap-2 border-r border-white/5 group relative">
           <span className="text-[10px] font-bold text-slate-600 uppercase tracking-tighter">BPM</span>
           <span className="text-xs font-mono font-bold text-studio-primary tabular-nums">128.0</span>
@@ -106,7 +107,7 @@ export function Toolbar({ onToggleSidebar, onToggleLibrary, showLibrary }: Toolb
         </div>
       </div>
 
-      <div className="flex items-center bg-black/40 border border-white/5 p-1 rounded-full gap-1">
+      <div className="hidden md:flex items-center bg-black/40 border border-white/5 p-1 rounded-full gap-1">
         <button className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-white text-black text-xs font-bold transition-all">
           <Music size={14} />
           <span className="hidden sm:inline">Track</span>
@@ -127,7 +128,17 @@ export function Toolbar({ onToggleSidebar, onToggleLibrary, showLibrary }: Toolb
         </button>
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-3">
+        {onInstallApp && (
+          <button
+            onClick={onInstallApp}
+            className="flex items-center gap-2 rounded-full bg-studio-primary px-3 py-2 text-xs font-bold text-white shadow-lg shadow-studio-primary/20 transition-all hover:bg-studio-primary-hover active:scale-95"
+            title="Install Studio One"
+          >
+            <Download size={16} />
+            <span className="hidden sm:inline">Install</span>
+          </button>
+        )}
         <button className="p-2 hover:bg-studio-hover rounded-full text-slate-400 transition-colors relative">
           <div className="absolute top-2 right-2 w-1.5 h-1.5 bg-studio-primary rounded-full" />
           <Cloud size={20} />
